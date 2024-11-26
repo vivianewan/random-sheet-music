@@ -1,69 +1,74 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 function App() {
-  // Notes range updated to match the image:
-  // G clef: from 2 ledger lines below to 2 ledger lines above staff
-  const gClefNotes = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5'];
+  // Move these outside of the component to avoid recreating them on every render
+  const GCLEF_NOTES = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5'];
+  const FCLEF_NOTES = ['E2', 'F2', 'G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4'];
   
-  // F clef: from 2 ledger lines below to 2 ledger lines above staff
-  const fClefNotes = ['E2', 'F2', 'G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4'];
+  const NOTE_POSITIONS = {
+    'G': {
+      'A5': 2, 'G5': 3, 'F5': 4, 'E5': 5, 'D5': 6, 'C5': 7, 'B4': 8,
+      'A4': 9, 'G4': 10, 'F4': 11, 'E4': 12, 'D4': 13, 'C4': 14
+    },
+    'F': {
+      'C4': 2, 'B3': 3, 'A3': 4, 'G3': 5, 'F3': 6, 'E3': 7, 'D3': 8,
+      'C3': 9, 'B2': 10, 'A2': 11, 'G2': 12, 'F2': 13, 'E2': 14
+    }
+  };
+
+  const LEDGER_LINES = {
+    'G': {
+      'A5': 2,    // 2 ledger lines above
+      'G5': 1,    // 1 ledger line above
+      'G4': -1,   // 1 ledger line below
+      'F4': -2,   // 2 ledger lines below
+      'E4': -2,
+      'D4': -2,
+      'C4': -2,
+    },
+    'F': {
+      'C4': 2,    // 2 ledger lines above
+      'B3': 1,    // 1 ledger line above
+      'B2': -1,   // 1 ledger line below
+      'A2': -2,   // 2 ledger lines below
+      'G2': -2,
+      'F2': -2,
+      'E2': -2,
+    }
+  };
 
   const [currentClef, setCurrentClef] = useState('G');
   const [notes, setNotes] = useState([]);
 
-  const notePositions = {
-    'G': {
-      'A5': 2,  // 2nd ledger line above
-      'G5': 3,  // 1st ledger line above
-      'F5': 4,  // 5th line
-      'E5': 5,  // 4th line
-      'D5': 6,  // 3rd line
-      'C5': 7,  // 2nd line
-      'B4': 8,  // 1st line
-      'A4': 9,  // 1st space below
-      'G4': 10, // 1st ledger line below
-      'F4': 11, // 2nd ledger line below
-      'E4': 12,
-      'D4': 13,
-      'C4': 14
-    },
-    'F': {
-      'C4': 2,  // 2nd ledger line above
-      'B3': 3,  // 1st ledger line above
-      'A3': 4,  // 5th line
-      'G3': 5,  // 4th line
-      'F3': 6,  // 3rd line
-      'E3': 7,  // 2nd line
-      'D3': 8,  // 1st line
-      'C3': 9,  // 1st space below
-      'B2': 10, // 1st ledger line below
-      'A2': 11, // 2nd ledger line below
-      'G2': 12,
-      'F2': 13,
-      'E2': 14
-    }
-  };
-
   const generateRandomNotes = useCallback(() => {
-    const numberOfNotes = Math.floor(Math.random() * 8) + 4; // Generate 4-12 notes
-    const availableNotes = currentClef === 'G' ? gClefNotes : fClefNotes;
+    const numberOfNotes = Math.floor(Math.random() * 8) + 4;
+    const availableNotes = currentClef === 'G' ? GCLEF_NOTES : FCLEF_NOTES;
     return Array.from({ length: numberOfNotes }, () => 
       availableNotes[Math.floor(Math.random() * availableNotes.length)]
     );
   }, [currentClef]);
 
   const getNotePosition = useCallback((note) => {
-    return notePositions[currentClef][note] * 5;
+    return NOTE_POSITIONS[currentClef][note] * 5;
+  }, [currentClef]);
+
+  const needsLedgerLines = useCallback((note) => {
+    return LEDGER_LINES[currentClef][note] || 0;
   }, [currentClef]);
 
   const regenerateMusic = useCallback(() => {
-    setCurrentClef(Math.random() < 0.5 ? 'G' : 'F');
-    setNotes(generateRandomNotes());
-  }, [generateRandomNotes]);
+    const newClef = Math.random() < 0.5 ? 'G' : 'F';
+    setCurrentClef(newClef);
+    setNotes(Array.from({ length: Math.floor(Math.random() * 8) + 4 }, () => {
+      const availableNotes = newClef === 'G' ? GCLEF_NOTES : FCLEF_NOTES;
+      return availableNotes[Math.floor(Math.random() * availableNotes.length)];
+    }));
+  }, []);
 
+  // Only run once on mount
   useEffect(() => {
     regenerateMusic();
-  }, [regenerateMusic]);
+  }, []); // Empty dependency array
 
   return (
     <div style={{ 
@@ -147,27 +152,51 @@ function App() {
               {currentClef === 'G' ? '\u{1D11E}' : '\u{1D122}'}
             </text>
 
-            {/* Notes */}
-            {notes.map((note, index) => (
-              <g key={`note-${index}`}>
-                <ellipse
-                  cx={80 + index * 40}
-                  cy={20 + getNotePosition(note)}
-                  rx="6"
-                  ry="4"
-                  transform={`rotate(-20, ${80 + index * 40}, ${20 + getNotePosition(note)})`}
-                  fill="black"
-                />
-                <line
-                  x1={86 + index * 40}
-                  y1={20 + getNotePosition(note)}
-                  x2={86 + index * 40}
-                  y2={20 + getNotePosition(note) - 30}
-                  stroke="black"
-                  strokeWidth="1"
-                />
-              </g>
-            ))}
+            {/* Notes with ledger lines */}
+            {notes.map((note, index) => {
+              const ledgerLineCount = needsLedgerLines(note);
+              const noteY = 20 + getNotePosition(note);
+              
+              return (
+                <g key={`note-${index}`}>
+                  {/* Ledger lines */}
+                  {ledgerLineCount !== 0 && Array.from(
+                    { length: Math.abs(ledgerLineCount) },
+                    (_, i) => (
+                      <line
+                        key={`ledger-${i}`}
+                        x1={73 + index * 40}
+                        y1={noteY + (ledgerLineCount > 0 ? -i * 10 : i * 10)}
+                        x2={87 + index * 40}
+                        y2={noteY + (ledgerLineCount > 0 ? -i * 10 : i * 10)}
+                        stroke="black"
+                        strokeWidth="1"
+                      />
+                    )
+                  )}
+                  
+                  {/* Note head */}
+                  <ellipse
+                    cx={80 + index * 40}
+                    cy={noteY}
+                    rx="6"
+                    ry="4"
+                    transform={`rotate(-20, ${80 + index * 40}, ${noteY})`}
+                    fill="black"
+                  />
+                  
+                  {/* Note stem */}
+                  <line
+                    x1={86 + index * 40}
+                    y1={noteY}
+                    x2={86 + index * 40}
+                    y2={noteY - 30}
+                    stroke="black"
+                    strokeWidth="1"
+                  />
+                </g>
+              );
+            })}
           </svg>
           
           <div style={{
