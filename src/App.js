@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const RandomSheetMusic = () => {
+function App() {
   // Define available notes for each clef
   const gClefNotes = ['B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5', 'C6', 'D6'];
   const fClefNotes = ['C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4'];
@@ -41,19 +41,53 @@ const RandomSheetMusic = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">
+    <div style={{ 
+      minHeight: '100vh', 
+      backgroundColor: '#f3f4f6', 
+      padding: '3rem 1rem'
+    }}>
+      <div style={{
+        maxWidth: '42rem',
+        margin: '0 auto',
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '0.5rem',
+          padding: '1.5rem',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '1.5rem',
+          }}>
+            <h1 style={{
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              color: '#111827',
+            }}>
               Random Sheet Music ({currentClef} Clef)
             </h1>
             <button
               onClick={regenerateMusic}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
+              style={{
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                padding: '0.5rem 1rem',
+                borderRadius: '0.375rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                border: 'none',
+                cursor: 'pointer',
+              }}
             >
               <svg
-                className="w-4 h-4"
+                style={{
+                  width: '1rem',
+                  height: '1rem',
+                }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -69,7 +103,7 @@ const RandomSheetMusic = () => {
             </button>
           </div>
           
-          <svg viewBox="0 0 400 100" className="w-full">
+          <svg viewBox="0 0 400 100" style={{ width: '100%' }}>
             {/* Staff lines */}
             {[0, 1, 2, 3, 4].map((i) => (
               <line
@@ -111,13 +145,17 @@ const RandomSheetMusic = () => {
             ))}
           </svg>
           
-          <div className="mt-6 text-sm text-gray-500">
+          <div style={{
+            marginTop: '1.5rem',
+            fontSize: '0.875rem',
+            color: '#6b7280',
+          }}>
             Click "Generate New" or refresh the page to create new random sheet music.
           </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
-export default RandomSheetMusic;
+export default App;
