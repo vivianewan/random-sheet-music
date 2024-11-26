@@ -1,44 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 function App() {
-  // Define available notes for each clef
-  const gClefNotes = ['B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5', 'C6', 'D6'];
-  const fClefNotes = ['C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4'];
+  // Notes range updated to match the image:
+  // G clef: from 2 ledger lines below to 2 ledger lines above staff
+  const gClefNotes = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5'];
+  
+  // F clef: from 2 ledger lines below to 2 ledger lines above staff
+  const fClefNotes = ['E2', 'F2', 'G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4'];
 
   const [currentClef, setCurrentClef] = useState('G');
   const [notes, setNotes] = useState([]);
 
   const notePositions = {
     'G': {
-      'C6': 0, 'B5': 1, 'A5': 2, 'G5': 3, 'F5': 4, 'E5': 5, 'D5': 6, 'C5': 7,
-      'B4': 8, 'A4': 9, 'G4': 10, 'F4': 11, 'E4': 12, 'D4': 13, 'C4': 14, 'B3': 15
+      'A5': 2,  // 2nd ledger line above
+      'G5': 3,  // 1st ledger line above
+      'F5': 4,  // 5th line
+      'E5': 5,  // 4th line
+      'D5': 6,  // 3rd line
+      'C5': 7,  // 2nd line
+      'B4': 8,  // 1st line
+      'A4': 9,  // 1st space below
+      'G4': 10, // 1st ledger line below
+      'F4': 11, // 2nd ledger line below
+      'E4': 12,
+      'D4': 13,
+      'C4': 14
     },
     'F': {
-      'C4': 0, 'B3': 1, 'A3': 2, 'G3': 3, 'F3': 4, 'E3': 5, 'D3': 6, 'C3': 7,
-      'B2': 8, 'A2': 9, 'G2': 10, 'F2': 11, 'E2': 12, 'D2': 13, 'C2': 14
+      'C4': 2,  // 2nd ledger line above
+      'B3': 3,  // 1st ledger line above
+      'A3': 4,  // 5th line
+      'G3': 5,  // 4th line
+      'F3': 6,  // 3rd line
+      'E3': 7,  // 2nd line
+      'D3': 8,  // 1st line
+      'C3': 9,  // 1st space below
+      'B2': 10, // 1st ledger line below
+      'A2': 11, // 2nd ledger line below
+      'G2': 12,
+      'F2': 13,
+      'E2': 14
     }
   };
 
-  const generateRandomNotes = () => {
+  const generateRandomNotes = useCallback(() => {
     const numberOfNotes = Math.floor(Math.random() * 8) + 4; // Generate 4-12 notes
     const availableNotes = currentClef === 'G' ? gClefNotes : fClefNotes;
     return Array.from({ length: numberOfNotes }, () => 
       availableNotes[Math.floor(Math.random() * availableNotes.length)]
     );
-  };
+  }, [currentClef]);
 
-  const getNotePosition = (note) => {
+  const getNotePosition = useCallback((note) => {
     return notePositions[currentClef][note] * 5;
-  };
+  }, [currentClef]);
 
-  const regenerateMusic = () => {
+  const regenerateMusic = useCallback(() => {
     setCurrentClef(Math.random() < 0.5 ? 'G' : 'F');
     setNotes(generateRandomNotes());
-  };
+  }, [generateRandomNotes]);
 
   useEffect(() => {
     regenerateMusic();
-  }, []);
+  }, [regenerateMusic]);
 
   return (
     <div style={{ 
